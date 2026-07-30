@@ -30,6 +30,27 @@ class TestRuleResurface(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
+    def test_heredoc_body_does_not_fire(self):
+        """A commit message quoting a watched command is data, not an invocation."""
+        cmd = ("git commit -q -F - <<'MSG'\n"
+               "docs: explain the merge gate\n\n"
+               "Never run gh pr merge without polling checks first.\n"
+               "MSG\n")
+        r = run_hook(cmd, self.root, self.state)
+        self.assertEqual(r.stdout.strip(), "")
+
+    def test_real_command_after_a_heredoc_still_fires(self):
+        cmd = ("cat > notes.txt <<'EOF'\nsome text\nEOF\n"
+               "gh pr merge 42\n")
+        r = run_hook(cmd, self.root, self.state)
+        self.assertIn("never-merge-without-ci", r.stdout)
+
+    def test_unterminated_heredoc_is_left_alone(self):
+        """Don't swallow the whole command when the delimiter never closes."""
+        cmd = "gh pr merge 42 <<'EOF'\nstill open"
+        r = run_hook(cmd, self.root, self.state)
+        self.assertIn("never-merge-without-ci", r.stdout)
+
     def test_match_denies_with_reminder(self):
         r = run_hook("gh pr merge 123 --merge", self.root, self.state)
         self.assertEqual(r.returncode, 0)

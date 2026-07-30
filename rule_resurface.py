@@ -12,6 +12,15 @@ import sys
 
 import memorylib as ml
 
+# A heredoc body is data, not a command. Commit messages and generated files
+# routinely quote the very commands rules watch for, so matching the raw string
+# fires the reminder on text that will never execute.
+HEREDOC_RE = re.compile(r"<<-?\s*(['\"]?)(\w+)\1.*?^\s*\2\s*$", re.S | re.M)
+
+
+def strip_heredocs(command: str) -> str:
+    return HEREDOC_RE.sub("<<HEREDOC", command)
+
 
 def main() -> None:
     try:
@@ -23,6 +32,7 @@ def main() -> None:
     command = (payload.get("tool_input") or {}).get("command", "")
     if not command:
         return
+    command = strip_heredocs(command)
     triggers_file = ml.MEMORY_DIR / "triggers.json"
     if not triggers_file.exists():
         return
