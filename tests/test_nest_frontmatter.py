@@ -34,7 +34,8 @@ class TestNestFrontmatter(unittest.TestCase):
     def test_idempotent(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            write(root, "arch_y.md", "---\nname: y\ndescription: d\ntype: arch\ntier: 1\n---\nbody\n")
+            write(root, "arch_y.md",
+                  "---\nname: y\ndescription: d\ntype: arch\ntier: 1\n---\nbody\n")
             nf.migrate(root, dry=False)
             first = (root / "arch_y.md").read_text()
             changed, _ = nf.migrate(root, dry=False)
@@ -108,7 +109,8 @@ class TestNestFrontmatter(unittest.TestCase):
     def test_dry_run_writes_nothing(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            f = write(root, "arch_e.md", "---\nname: e\ndescription: d\ntype: arch\ntier: 1\n---\nbody\n")
+            f = write(root, "arch_e.md",
+                      "---\nname: e\ndescription: d\ntype: arch\ntier: 1\n---\nbody\n")
             before = f.read_text()
             changed, _ = nf.migrate(root, dry=True)
             self.assertEqual(len(changed), 1)
@@ -127,7 +129,8 @@ class TestNestFrontmatter(unittest.TestCase):
             nf.migrate(root, dry=False)
             after_text = f.read_text()
             self.assertEqual(ml.parse_frontmatter(after_text), before_fm)
-            self.assertEqual(ml.resolve(ml.parse_frontmatter(after_text), "feedback_f.md"), before_res)
+            after_fm = ml.parse_frontmatter(after_text)
+            self.assertEqual(ml.resolve(after_fm, "feedback_f.md"), before_res)
             self.assertEqual(before_fm["last_modified"], "1778622504")
 
 

@@ -56,7 +56,8 @@ def render(entries: list[dict]) -> str:
         counts[e["fm"]["type"]] = counts.get(e["fm"]["type"], 0) + 1
     summary = ", ".join(f"{n} {t}" for t, n in sorted(counts.items()))
     lines += ["", "## Tier 1 (on demand)", "",
-              f"{len(t1)} files not indexed here ({summary}) — Grep or memory_cli.py reaches them.", ""]
+              f"{len(t1)} files not indexed here ({summary}) — "
+              "Grep or memory_cli.py reaches them.", ""]
     return "\n".join(lines)
 
 
@@ -101,5 +102,6 @@ if __name__ == "__main__":
     n = regen()
     over, size, nlines, cands = budget_status()
     print(f"regen: {len(n)} entries, MEMORY.md {size}B/{nlines}L"
-          + (f" OVER BUDGET — demote candidates: {', '.join(cands)}" if over else " (within budget)"))
+          + (f" OVER BUDGET — demote candidates: {', '.join(cands)}"
+             if over else " (within budget)"))
     sys.exit(0)

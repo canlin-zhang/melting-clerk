@@ -13,11 +13,13 @@ def make_store(root: Path):
         "---\nname: profile\ndescription: role and team\ntype: user\n---\nbody\n")
     (root / "feedback_ci.md").write_text(
         "---\nname: never-merge-without-ci\ndescription: poll checks first\ntype: feedback\n"
-        'triggers: ["gh pr merge"]\n---\n**How to apply:** poll PR HEAD check-runs to success before any merge.\n')
+        'triggers: ["gh pr merge"]\n---\n'
+        '**How to apply:** poll PR HEAD check-runs to success before any merge.\n')
     (root / "project_active.md").write_text(
         "---\nname: active-proj\ndescription: in flight\ntype: project\n---\nbody\n")
     (root / "todo_merged.md").write_text(
-        "---\nname: done-todo\ndescription: merged already\ntype: todo\nstatus: merged\n---\nbody\n")
+        "---\nname: done-todo\ndescription: merged already\n"
+        "type: todo\nstatus: merged\n---\nbody\n")
     (root / "arch_notes.md").write_text(
         "---\nname: arch-notes\ndescription: lookup material\ntype: arch\n---\nbody\n")
     (root / "past_projects" / "past_pr_1.md").write_text(

@@ -40,7 +40,8 @@ class TestNormalizeMemoryWrite(unittest.TestCase):
 
     def test_silent_and_unchanged_when_already_canonical(self):
         f = self.store / "feedback_x.md"
-        f.write_text("---\nname: x\ndescription: d\nmetadata:\n  type: feedback\n  tier: 0\n---\nbody\n")
+        f.write_text("---\nname: x\ndescription: d\nmetadata:\n"
+                     "  type: feedback\n  tier: 0\n---\nbody\n")
         before = f.read_text()
         r = run_hook(self.store, f)
         self.assertEqual(r.stdout.strip(), "")

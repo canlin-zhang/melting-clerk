@@ -22,7 +22,8 @@ def main() -> None:
     if over:
         print(f"[memory-budget] Generated MEMORY.md is over budget: {size}B/{nlines}L "
               f"(max {ml.MAX_BYTES}B/{ml.MAX_LINES}L). Demote (status flip or tier: 1) the "
-              f"oldest Tier-0 entries: {', '.join(cands)}. Do this as a clerk pass early in the session.")
+              f"oldest Tier-0 entries: {', '.join(cands)}. "
+              f"Do this as a clerk pass early in the session.")
     if payload.get("source") == "compact":
         print("[clerk] Compaction just occurred. Run a clerk pass now: file decisions/root-causes "
               "from the compacted span into ~/.claude/memory/ with Write/Edit; flip status on "

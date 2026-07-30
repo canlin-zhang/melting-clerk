@@ -101,7 +101,8 @@ def resolve(fm: dict, relpath: str) -> tuple[int, str]:
     """
     status = fm.get("status", "")
     if not status:
-        status = "archived" if ("archived" in fm or relpath.startswith("past_projects/")) else "active"
+        is_archived = "archived" in fm or relpath.startswith("past_projects/")
+        status = "archived" if is_archived else "active"
     tier_raw = str(fm.get("tier", ""))
     tier = int(tier_raw) if tier_raw.isdigit() else (0 if fm.get("type") in TIER0_TYPES else 1)
     if status != "active":
@@ -160,12 +161,14 @@ def count_human_messages(transcript_path: str) -> int:
                 if rec.get("type") == "user" or msg.get("role") == "user":
                     content = msg.get("content", "")
                     if isinstance(content, list):
-                        if any(isinstance(c, dict) and c.get("type") == "tool_result" for c in content):
+                        if any(isinstance(c, dict) and c.get("type") == "tool_result"
+                               for c in content):
                             continue
                         text = " ".join(c.get("text", "") for c in content if isinstance(c, dict))
                     else:
                         text = str(content)
-                    if "<command-name>" in text or "<local-command-stdout>" in text or not text.strip():
+                    if ("<command-name>" in text or "<local-command-stdout>" in text
+                            or not text.strip()):
                         continue
                     n += 1
     except OSError:

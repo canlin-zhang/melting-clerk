@@ -11,7 +11,8 @@ import sys
 
 import memorylib as ml
 
-CADENCE = 50  # was 25 — fired too often. Enforcement is behavioral (file deltas as state lands), not frequency.
+# Enforcement is behavioural - file deltas as state lands - not frequency; 25 fired too often.
+CADENCE = 50
 
 CLERK_INSTRUCTION = (
     "Clerk pass (fires only every 50 human messages — rare, so do NOT skip it). You MUST review "
@@ -19,7 +20,8 @@ CLERK_INSTRUCTION = (
     "rule-worthy feedback into ~/.claude/memory/ with the Write/Edit tools (small targeted edits, "
     "not slow full rewrites); name files `<type>_<slug>.md` and keep clerk fields under "
     "`metadata:`; a NEW project memory is a pointer — issue number, one state line, and only what "
-    "`gh issue view` cannot tell you (worktree, branch, scratch paths, decisions never written up); "
+    "`gh issue view` cannot tell you (worktree, branch, scratch paths, "
+    "decisions never written up); "
     "file a todo as an issue, not as a memory; (2) flip `status:` on any memory this session "
     "invalidated (PR merged -> status: "
     "merged; superseded -> tombstone the body); (3) refresh the handoff at "

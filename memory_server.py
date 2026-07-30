@@ -83,7 +83,8 @@ def _score(text: str, query: str) -> float:
     body = text[m.end():] if m else text
     header_lower = header.lower()
     body_lower = body.lower()
-    return sum(header_lower.count(w) for w in words) * 3.0 + sum(body_lower.count(w) for w in words) * 1.0
+    return (sum(header_lower.count(w) for w in words) * 3.0
+            + sum(body_lower.count(w) for w in words) * 1.0)
 
 
 def _atomic_write(path: Path, text: str) -> None:
@@ -150,7 +151,8 @@ def health_check() -> dict:
             t = fm.get("type", "unknown")
             by_type[t] = by_type.get(t, 0) + 1
         status["by_type"] = by_type
-        archived = list((MEMORY_DIR / "past_projects").glob("*.md")) if (MEMORY_DIR / "past_projects").exists() else []
+        past = MEMORY_DIR / "past_projects"
+        archived = list(past.glob("*.md")) if past.exists() else []
         status["archived_count"] = len(archived)
         if not (MEMORY_DIR / "MEMORY.md").exists():
             status["issues"].append("MEMORY.md not found — wrong directory?")

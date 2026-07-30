@@ -140,11 +140,13 @@ class TestMigrate(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             f = root / "feedback_x.md"
-            f.write_text("---\nname: x\ndescription: d\ntype: feedback\nlast_modified: 1778622504\n---\nbody\n")
+            f.write_text("---\nname: x\ndescription: d\ntype: feedback\n"
+                         "last_modified: 1778622504\n---\nbody\n")
             changed = mig.migrate(root, dry=False)
             self.assertEqual(changed, [("feedback_x.md", ["status: active", "tier: 0"])])
             text = f.read_text()
-            self.assertIn("last_modified: 1778622504", text)   # untouched — staleness data preserved
+            # untouched — staleness data preserved
+            self.assertIn("last_modified: 1778622504", text)
             self.assertIn("status: active", text)
             self.assertIn("tier: 0", text)
             self.assertEqual(mig.migrate(root, dry=False), [])  # idempotent

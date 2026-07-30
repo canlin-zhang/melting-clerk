@@ -62,7 +62,8 @@ class TestClerkCadence(unittest.TestCase):
     def test_tool_results_and_command_expansions_not_counted(self):
         make_transcript(self.transcript, n_human=CADENCE - 5, n_tool_results=40)
         r = run_hook(self.transcript, self.state)
-        self.assertEqual(r.stdout.strip(), "")   # real humans still under cadence despite 40 tool rows
+        # real humans still under cadence despite 40 tool rows
+        self.assertEqual(r.stdout.strip(), "")
 
     def test_stop_hook_active_passes_through(self):
         make_transcript(self.transcript, n_human=60)

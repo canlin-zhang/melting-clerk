@@ -11,10 +11,12 @@ _THRESHOLD = 600  # 10 minutes
 
 def main() -> None:
     if not HANDOFF_FILE.exists():
-        print("[session-wrap] No handoff written - run /session-wrap to preserve context for next session")
+        print("[session-wrap] No handoff written - run /session-wrap "
+              "to preserve context for next session")
         return
     if time.time() - HANDOFF_FILE.stat().st_mtime > _THRESHOLD:
-        print("[session-wrap] Handoff not updated this session - run /session-wrap to preserve context")
+        print("[session-wrap] Handoff not updated this session - "
+              "run /session-wrap to preserve context")
 
 
 if __name__ == "__main__":

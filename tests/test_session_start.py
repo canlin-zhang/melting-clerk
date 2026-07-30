@@ -92,7 +92,8 @@ class TestSessionStart(unittest.TestCase):
     def test_registry_is_repo_agnostic(self):
         """expected_origin comes from the file, so any repo can be tracked."""
         repo = make_repo(self.root / "totally-different", "unrelated-org/unrelated-repo")
-        (self.store / "clones.md").write_text(REGISTRY.format(origin="unrelated-org/unrelated-repo"))
+        (self.store / "clones.md").write_text(
+            REGISTRY.format(origin="unrelated-org/unrelated-repo"))
         out = run_hook(self.store, repo).stdout
         self.assertNotIn("<unregistered>", out)
         self.assertIn("totally-different", (self.store / "clones.md").read_text())

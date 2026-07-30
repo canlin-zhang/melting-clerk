@@ -221,7 +221,8 @@ def main() -> None:
         if auto_added:
             bits.append("(auto-registered)")
         elif label == "<unregistered>":
-            bits.append(f"— origin doesn't match expected_origin; edit {MEMORY_DIR / 'clones.md'} to add a row")
+            bits.append("— origin doesn't match expected_origin; "
+                        f"edit {MEMORY_DIR / 'clones.md'} to add a row")
         lines.append("Clone: " + " ".join(bits))
 
     handoff = _get_handoff()
