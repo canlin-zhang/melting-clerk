@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Shared helpers for the curated-memory toolchain (regen, hooks, migration).
+"""Shared helpers for the memory toolchain (index regen, hooks, migrations).
 
-Frontmatter is parsed with a small line parser instead of PyYAML: hooks run on
-the system python (3.11, stdlib only), and the store uses just scalars, one
-optional `metadata:` nesting level, and one-line flow lists.
+Frontmatter is parsed with a small line parser instead of PyYAML, because hooks
+run on the system python with stdlib only. The store needs just scalars, one
+optional `metadata:` nesting level, and lists in either YAML spelling.
 """
 import json
 import os
@@ -11,9 +11,11 @@ import re
 from pathlib import Path
 
 MEMORY_DIR = Path(os.environ.get("CLAUDE_MEMORY_DIR", str(Path.home() / ".claude" / "memory")))
-STATE_DIR = Path(os.environ.get("CLERK_STATE_DIR", str(Path.home() / ".claude" / "scripts" / ".clerk_state")))
+STATE_DIR = Path(os.environ.get("CLERK_STATE_DIR", str(Path.home() / ".claude" / "clerk-state")))
 FM_RE = re.compile(r"^---\n(.*?)\n---\n?", re.DOTALL)
-HOW_RE = re.compile(r"\*\*How to apply:\*\*\s*(.+)")
+# Capture the whole paragraph, not the first line: these wrap, and a line-only
+# capture delivers the reminder cut off mid-sentence at action time.
+HOW_RE = re.compile(r"\*\*How to apply:\*\*\s*(.+?)(?:\n\s*\n|\n\s*\*\*|\Z)", re.S)
 
 TIER0_TYPES = {"feedback", "user", "project", "todo"}
 TYPE_ORDER = {"user": 0, "feedback": 1, "project": 2, "todo": 3, "reference": 4, "arch": 5}
@@ -30,25 +32,45 @@ MAX_BYTES = 24 * 1024
 MAX_LINES = 150
 
 
+def _scalar(raw: str) -> str:
+    """Unquote a YAML scalar, honouring JSON escapes so `\\\\b` stays one backslash."""
+    if len(raw) > 1 and raw[0] == raw[-1] == '"':
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            pass
+    return raw.strip("\"'")
+
+
 def parse_frontmatter(text: str) -> dict:
     """Parse the YAML-ish frontmatter block. Returns {} if absent.
 
     Handles both type variants in the store (top-level `type:` and
-    `metadata:`-nested), scalar values (colons allowed), and one-line
-    flow lists like `triggers: ["a", "b"]`.
+    `metadata:`-nested), scalar values (colons allowed), and lists in BOTH
+    YAML spellings: one-line flow (`triggers: ["a", "b"]`) and block
+    sequences. The block form is not optional to support - a host that
+    manages memory files may re-serialise frontmatter and rewrite a flow
+    list into a block sequence, and parsing only flow form drops those keys
+    silently, which is how a trigger list disappears without an error.
     """
     m = FM_RE.match(text)
     if not m:
         return {}
     out: dict = {}
     in_metadata = False
+    pending_list_key = None  # last key with an empty value: may own block items
     for line in m.group(1).splitlines():
         if not line.strip():
             continue
+        stripped = line.strip()
+        if pending_list_key and stripped.startswith("- "):
+            out.setdefault(pending_list_key, []).append(_scalar(stripped[2:].strip()))
+            continue
+        pending_list_key = None
         indented = line[0] in (" ", "\t")
         if not indented:
             in_metadata = False
-        key, sep, val = line.strip().partition(":")
+        key, sep, val = stripped.partition(":")
         if not sep:
             continue
         key, val = key.strip(), val.strip()
@@ -63,7 +85,10 @@ def parse_frontmatter(text: str) -> dict:
                 continue
             except json.JSONDecodeError:
                 pass
-        out[key] = val.strip("\"'")
+        if not val:
+            pending_list_key = key
+            continue
+        out[key] = _scalar(val)
     return out
 
 
@@ -102,10 +127,15 @@ def walk_memories(root=None) -> list[dict]:
 
 
 def extract_reminder(entry: dict) -> str:
-    """Reminder text for triggers.json: first 'How to apply' line, else description."""
+    """Reminder text for triggers.json: the 'How to apply' paragraph, else description.
+
+    Whitespace is collapsed so a wrapped paragraph arrives as one line, and the
+    result is capped - a reminder rides a permission-denial message, where length
+    costs attention at exactly the wrong moment.
+    """
     m = HOW_RE.search(entry["body"])
-    src = m.group(1).strip() if m else entry["fm"].get("description", "")
-    return src[:300]
+    src = m.group(1) if m else entry["fm"].get("description", "")
+    return " ".join(src.split())[:300]
 
 
 def count_human_messages(transcript_path: str) -> int:

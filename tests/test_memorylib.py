@@ -45,6 +45,66 @@ class TestParseFrontmatter(unittest.TestCase):
         """)
         self.assertEqual(d["triggers"], ["gh pr merge", "git push"])
 
+    def test_block_sequence_triggers(self):
+        """A host re-serialising frontmatter turns flow lists into block sequences."""
+        d = fm("""\
+        ---
+        name: x
+        description: y
+        metadata:
+          type: feedback
+          triggers:
+            - "gh pr merge"
+            - "git push"
+          last_modified: 1778622504
+        ---
+        """)
+        self.assertEqual(d["triggers"], ["gh pr merge", "git push"])
+        # keys after the block sequence must still parse
+        self.assertEqual(d["last_modified"], "1778622504")
+        self.assertEqual(d["type"], "feedback")
+
+    def test_block_sequence_preserves_regex_escapes(self):
+        d = fm("""\
+        ---
+        name: x
+        description: y
+        type: feedback
+        triggers:
+          - "git push .*--force(?!-with-lease)"
+          - "\\\\brm\\\\s+-[a-zA-Z]*[rR]"
+        ---
+        """)
+        # a doubled backslash in YAML is one backslash in the compiled pattern
+        self.assertEqual(d["triggers"][1], r"\brm\s+-[a-zA-Z]*[rR]")
+        self.assertIn("--force(?!-with-lease)", d["triggers"][0])
+
+    def test_unquoted_block_sequence_items(self):
+        d = fm("""\
+        ---
+        name: x
+        description: y
+        type: feedback
+        triggers:
+          - gh issue create
+          - gh issue comment
+        ---
+        """)
+        self.assertEqual(d["triggers"], ["gh issue create", "gh issue comment"])
+
+    def test_empty_valued_key_is_not_a_list(self):
+        d = fm("""\
+        ---
+        name: x
+        description: y
+        type: feedback
+        note:
+        status: active
+        ---
+        """)
+        self.assertEqual(d["status"], "active")
+        self.assertNotIn("note", d)
+
     def test_no_frontmatter(self):
         self.assertEqual(ml.parse_frontmatter("# Just a doc\n"), {})
 
