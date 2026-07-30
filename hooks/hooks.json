@@ -5,6 +5,16 @@
         "hooks": [
           {
             "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/session_start.py\"",
+            "timeout": 10,
+            "statusMessage": "Loading handoff and active todos..."
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
             "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/budget_guard.py\"",
             "timeout": 10,
             "statusMessage": "Regenerating the memory index..."

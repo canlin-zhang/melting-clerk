@@ -34,7 +34,7 @@ agent harness:
 | --- | --- | --- |
 | **Interface** | `memory_server.py` — MCP server over the store | Any MCP client |
 | **Core** | `memorylib.py`, `regen_index.py`, `nest_frontmatter.py`, `memory_cli.py` | Plain Python, no host assumptions |
-| **Host adapter** | `budget_guard.py`, `clerk_cadence.py`, `rule_resurface.py`, `normalize_memory_write.py`, `session_stop.py`, `skills/` | Claude Code specific |
+| **Host adapter** | `session_start.py`, `budget_guard.py`, `clerk_cadence.py`, `rule_resurface.py`, `normalize_memory_write.py`, `session_stop.py`, `skills/` | Claude Code specific |
 
 The adapter is the layer another harness replaces. The core and the MCP server
 are not Claude Code specific at all.
@@ -92,6 +92,22 @@ files themselves may model frontmatter as exactly `{name, description,
 metadata}` and rewrite it, spreading `metadata` through and dropping top-level
 keys they don't recognise. Nesting is what makes your `status` and `tier`
 survive that. See `docs/adr/0004`.
+
+## The handoff
+
+A handoff is not a memory — it is one file, `$CLAUDE_MEMORY_DIR/.handoff.md`, with
+no frontmatter, holding where work left off. `session_start.py` reads it and
+injects it into the next session along with your active todos, the branch, and
+which working copy you are in.
+
+That last part means the hook also carries a small clone registry, which is wider
+scope than "memory" strictly needs. It is here because a handoff saying "branch X,
+spec at this relative path" is ambiguous when several checkouts of one repo exist.
+The registry is data-driven — `expected_origin` lives in `clones.md` itself, so it
+tracks whatever repo you point it at, and an empty registry seeds its own first
+row. Copy `examples/clones.md` to get started, or delete the file and the hook
+degrades to branch, handoff and todos with no error. Reasoning in
+`docs/adr/0005`.
 
 Two invariants hold it together, both enforced rather than remembered:
 

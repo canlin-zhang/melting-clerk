@@ -10,7 +10,7 @@ description: End-of-session hygiene: write a handoff, prompt for memory saves, s
 Get branch: `git rev-parse --abbrev-ref HEAD`
 Get working tree: `git rev-parse --show-toplevel` — worth recording when you keep several clones or worktrees of the same repo, since the next session needs to know which one held the in-progress branch.
 
-Write `$CLAUDE_MEMORY_DIR/.handoff.md` (default `~/.claude/memory/.handoff.md`) with the Write tool, using this structure (see HANDOFF-TEMPLATE.md). It has no frontmatter and is not a memory file — nothing indexes it. A SessionStart hook is expected to read that path and inject it as the next session's opening context.
+Write `$CLAUDE_MEMORY_DIR/.handoff.md` (default `~/.claude/memory/.handoff.md`) with the Write tool, using this structure (see HANDOFF-TEMPLATE.md). It has no frontmatter and is not a memory file — nothing indexes it. `session_start.py` reads that path and injects it as the next session's opening context, so the `Tree:` line above comes from the same clone registry it reports.
 
 ```
 Branch: <branch>
