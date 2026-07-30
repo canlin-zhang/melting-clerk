@@ -70,7 +70,7 @@ class TestRegen(unittest.TestCase):
         (self.root / "feedback_long.md").write_text(
             "---\nname: long\ndescription: " + "x" * 400 + "\ntype: feedback\n---\nbody\n")
         text = ri.render(memorylib.walk_memories(self.root))
-        bad = [l for l in text.splitlines() if l.startswith("- [") and len(l) > 200]
+        bad = [ln for ln in text.splitlines() if ln.startswith("- [") and len(ln) > 200]
         self.assertEqual(bad, [])
 
     def test_over_budget_reports_candidates(self):

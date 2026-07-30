@@ -135,6 +135,7 @@ class TestMigrate(unittest.TestCase):
     def test_stamps_tier_status_preserves_last_modified(self):
         import tempfile
         from pathlib import Path
+
         import migrate_frontmatter as mig
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
@@ -151,6 +152,7 @@ class TestMigrate(unittest.TestCase):
     def test_dry_run_writes_nothing(self):
         import tempfile
         from pathlib import Path
+
         import migrate_frontmatter as mig
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
