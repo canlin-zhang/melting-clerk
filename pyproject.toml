@@ -1,0 +1,25 @@
+# Dev/test environment only. The MCP server's runtime dependencies live in the
+# PEP-723 `# /// script` block at the top of memory_server.py, so it can be run
+# with `uv run memory_server.py` and nothing else installed; they are mirrored
+# here so the test suite resolves imports from the repo root.
+[project]
+name = "melting-clerk"
+version = "0.1.0"
+description = "Tiered agent memory with a generated, budgeted index and a status/tier lifecycle."
+requires-python = ">=3.11"
+dependencies = [
+    "mcp[cli]",
+]
+
+[dependency-groups]
+dev = ["pytest"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]   # pycodestyle, pyflakes, isort, pyupgrade, bugbear

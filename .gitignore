@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.venv/
+*.db
+
+# Never commit a real memory store, even if CLAUDE_MEMORY_DIR is pointed
+# into the tree for a test run. Memory is personal by nature.
+/memory/
+/.memory/
+
+# Dev process scaffolding (implementation plans, specs) - not published.
+docs/superpowers/

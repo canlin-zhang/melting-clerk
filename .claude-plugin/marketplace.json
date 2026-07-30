@@ -1,0 +1,11 @@
+{
+  "name": "melting-clerk",
+  "owner": { "name": "Canlin Zhang" },
+  "plugins": [
+    {
+      "name": "melting-clerk",
+      "source": "./",
+      "description": "Tiered agent memory with a generated, budgeted index and a lifecycle."
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "melting-clerk",
+  "description": "Tiered agent memory that stays in budget: a generated index, status/tier lifecycle, action-time rule recall, and a frontmatter shape that survives being rewritten.",
+  "version": "0.1.0",
+  "author": { "name": "Canlin Zhang" },
+  "license": "MIT",
+  "homepage": "https://github.com/canlin-zhang/melting-clerk",
+  "mcpServers": {
+    "memory": {
+      "command": "uv",
+      "args": ["run", "${CLAUDE_PLUGIN_ROOT}/memory_server.py"]
+    }
+  }
+}
