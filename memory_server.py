@@ -12,9 +12,10 @@ import sys
 import time
 from pathlib import Path
 
+from mcp.server.fastmcp import FastMCP
+
 import memorylib as ml
 import nest_frontmatter as nf
-from mcp.server.fastmcp import FastMCP
 
 MEMORY_DIR = Path(os.environ.get("CLAUDE_MEMORY_DIR", str(Path.home() / ".claude" / "memory")))
 HANDOFF_FILE = MEMORY_DIR / ".handoff.md"
