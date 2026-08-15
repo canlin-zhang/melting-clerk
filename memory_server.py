@@ -177,17 +177,14 @@ def list_recent_memories(days: int = 7, type: str = "") -> list[dict]:
 
 @mcp.tool()
 def list_stale_memories(days: int = 90, type: str = "") -> list[dict]:
-    """Return memory files not modified in the last N days, oldest first.
+    """Return stale (unmodified) memory files, oldest first.
 
-    Excludes MEMORY.md and past_projects/. Used by /memory-audit to surface
-    candidates for archiving or merging. Does not take any action.
+    Used by /memory-audit to surface candidates for archiving or merging. Does
+    not take any action.
     """
     cutoff = time.time() - days * 86400
-    past_projects_dir = MEMORY_DIR / "past_projects"
     results = []
     for f in _all_memory_files():
-        if f.is_relative_to(past_projects_dir):
-            continue
         if f.stat().st_mtime > cutoff:
             continue
         fm = ml.parse_frontmatter(f.read_text())
@@ -340,7 +337,11 @@ def write_memory(filename: str, content: str) -> str:
         fm_block = content[4:end]
         body = content[end + 4:]
         if "last_modified:" in fm_block:
-            fm_block = re.sub(r'(^|\n)last_modified:.*', rf'\1last_modified: {now_ts}', fm_block)
+            fm_block = re.sub(
+                r'(^|\n)(\s*)last_modified:.*',
+                rf'\1\2last_modified: {now_ts}',
+                fm_block,
+            )
         else:
             fm_block += f"\nlast_modified: {now_ts}"
         content = f"---\n{fm_block}\n---{body}"
