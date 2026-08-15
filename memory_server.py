@@ -7,18 +7,20 @@
 # ///
 import os
 import re
+import shutil
 import sys
 import time
 from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
+import memorylib as ml
+import nest_frontmatter as nf
+
 MEMORY_DIR = Path(os.environ.get("CLAUDE_MEMORY_DIR", str(Path.home() / ".claude" / "memory")))
 HANDOFF_FILE = MEMORY_DIR / ".handoff.md"
 
 mcp = FastMCP("memory")
-
-_FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---\n?", re.DOTALL)
 
 
 def _startup_checks() -> None:
@@ -42,18 +44,6 @@ def _startup_checks() -> None:
         print(f"[memory-server] OK — {MEMORY_DIR}", file=sys.stderr)
 
 
-def _parse_frontmatter(text: str) -> tuple[dict, str]:
-    m = _FRONTMATTER_RE.match(text)
-    if not m:
-        return {}, text
-    fm: dict[str, str] = {}
-    for line in m.group(1).splitlines():
-        if ": " in line:
-            k, v = line.split(": ", 1)
-            fm[k.strip()] = v.strip()
-    return fm, text[m.end():]
-
-
 def _resolve_memory_path(filename: str) -> tuple[Path | None, str]:
     """Resolve and validate a memory file path, blocking traversal escapes."""
     if not filename.endswith(".md"):
@@ -70,7 +60,11 @@ def _all_memory_files() -> list[Path]:
     if not MEMORY_DIR.exists():
         return []
     excluded = {"MEMORY.md", HANDOFF_FILE.name}
-    return sorted(f for f in MEMORY_DIR.rglob("*.md") if f.name not in excluded)
+    past = MEMORY_DIR / "past_projects"
+    return sorted(
+        f for f in MEMORY_DIR.rglob("*.md")
+        if f.name not in excluded and not f.is_relative_to(past)
+    )
 
 
 def _score(text: str, query: str) -> float:
@@ -78,56 +72,13 @@ def _score(text: str, query: str) -> float:
     words = [w for w in query.lower().split() if w]
     if not words:
         return 0.0
-    m = _FRONTMATTER_RE.match(text)
+    m = ml.FM_RE.match(text)
     header = m.group(1) if m else ""
     body = text[m.end():] if m else text
     header_lower = header.lower()
     body_lower = body.lower()
     return (sum(header_lower.count(w) for w in words) * 3.0
             + sum(body_lower.count(w) for w in words) * 1.0)
-
-
-def _atomic_write(path: Path, text: str) -> None:
-    """Write `text` to `path` atomically via a sibling tmp file."""
-    tmp = path.with_suffix(".tmp")
-    tmp.write_text(text)
-    tmp.replace(path)
-
-
-def _patch_memory_index(filename: str, index_line: str) -> None:
-    """Replace or append an entry for `filename` in MEMORY.md.
-
-    Searches for a Markdown link bullet matching (filename) and replaces it.
-    If absent, appends under '### Unsorted' (creates the section if needed).
-    """
-    index_path = MEMORY_DIR / "MEMORY.md"
-    if not index_path.exists():
-        return
-    text = index_path.read_text()
-    lines = text.splitlines(keepends=True)
-
-    # Replace existing line referencing this filename (match Markdown link syntax)
-    pattern = re.compile(r"\(" + re.escape(filename) + r"\)")
-    for i, line in enumerate(lines):
-        if pattern.search(line) and line.strip().startswith("-"):
-            lines[i] = index_line + "\n"
-            _atomic_write(index_path, "".join(lines))
-            return
-
-    # Append under existing ### Unsorted section
-    unsorted = "### Unsorted\n"
-    idx = next(
-        (i + 1 for i, line in enumerate(lines) if line == unsorted),
-        None,
-    )
-    if idx is not None:
-        lines.insert(idx, index_line + "\n")
-        _atomic_write(index_path, "".join(lines))
-        return
-
-    # No Unsorted section: create it at the end
-    suffix = "" if text.endswith("\n") else "\n"
-    _atomic_write(index_path, text + suffix + f"\n### Unsorted\n{index_line}\n")
 
 
 @mcp.tool()
@@ -147,7 +98,7 @@ def health_check() -> dict:
         status["file_count"] = len(files)
         by_type: dict[str, int] = {}
         for f in files:
-            fm, _ = _parse_frontmatter(f.read_text())
+            fm = ml.parse_frontmatter(f.read_text())
             t = fm.get("type", "unknown")
             by_type[t] = by_type.get(t, 0) + 1
         status["by_type"] = by_type
@@ -180,7 +131,7 @@ def list_memories(type: str = "") -> list[dict]:
     """
     results = []
     for f in _all_memory_files():
-        fm, _ = _parse_frontmatter(f.read_text())
+        fm = ml.parse_frontmatter(f.read_text())
         entry_type = fm.get("type", "")
         if type and entry_type != type:
             continue
@@ -207,7 +158,7 @@ def list_recent_memories(days: int = 7, type: str = "") -> list[dict]:
     for f in _all_memory_files():
         if f.stat().st_mtime < cutoff:
             continue
-        fm, _ = _parse_frontmatter(f.read_text())
+        fm = ml.parse_frontmatter(f.read_text())
         entry_type = fm.get("type", "")
         if type and entry_type != type:
             continue
@@ -226,20 +177,17 @@ def list_recent_memories(days: int = 7, type: str = "") -> list[dict]:
 
 @mcp.tool()
 def list_stale_memories(days: int = 90, type: str = "") -> list[dict]:
-    """Return memory files not modified in the last N days, oldest first.
+    """Return stale (unmodified) memory files, oldest first.
 
-    Excludes MEMORY.md and past_projects/. Used by /memory-audit to surface
-    candidates for archiving or merging. Does not take any action.
+    Used by /memory-audit to surface candidates for archiving or merging. Does
+    not take any action.
     """
     cutoff = time.time() - days * 86400
-    past_projects_dir = MEMORY_DIR / "past_projects"
     results = []
     for f in _all_memory_files():
-        if f.is_relative_to(past_projects_dir):
-            continue
         if f.stat().st_mtime > cutoff:
             continue
-        fm, _ = _parse_frontmatter(f.read_text())
+        fm = ml.parse_frontmatter(f.read_text())
         entry_type = fm.get("type", "")
         if type and entry_type != type:
             continue
@@ -323,7 +271,7 @@ def search_memories(
     files_scanned = 0
     for f in _all_memory_files():
         text = f.read_text()
-        fm, _ = _parse_frontmatter(text)
+        fm = ml.parse_frontmatter(text)
         entry_type = fm.get("type", "")
         if type and entry_type != type:
             continue
@@ -368,18 +316,14 @@ def search_memories(
 
 
 @mcp.tool()
-def write_memory(filename: str, content: str, index_line: str = "") -> str:
-    """Write or update a memory file. Supports subdirectory paths (e.g. past_projects/foo.md).
+def write_memory(filename: str, content: str) -> str:
+    """Write or update a memory file, canonicalizing its frontmatter.
 
-    Content must include YAML frontmatter with name, description, and type fields.
-    Does NOT touch MEMORY.md -- project memories are managed here, not in the index.
-
-    If index_line is provided (format: '- [Title](filename.md) — one-line hook'),
-    MEMORY.md is patched: the existing entry for this filename is replaced,
-    or the line is appended under '### Unsorted' (created if absent).
-
-    A last_modified timestamp (Unix epoch) is automatically injected into the
-    frontmatter on every write, so the memory-audit skill can resolve conflicts.
+    Content must include YAML frontmatter with `name` and `description`. The
+    clerk's fields (`type`, `status`, `tier`, `triggers`, `last_modified`) may be
+    top-level or nested under `metadata:`; they are normalized to the canonical
+    nested shape. A `last_modified` timestamp is injected on every write.
+    MEMORY.md is not touched — regen_index.py is its sole writer.
     """
     path, err = _resolve_memory_path(filename)
     if not path:
@@ -387,26 +331,27 @@ def write_memory(filename: str, content: str, index_line: str = "") -> str:
     path.parent.mkdir(parents=True, exist_ok=True)
     existed = path.exists()
 
-    # Inject last_modified timestamp into frontmatter
     now_ts = str(int(time.time()))
     if content.startswith("---\n"):
         end = content.index("\n---", 4)
         fm_block = content[4:end]
         body = content[end + 4:]
-        # Replace existing last_modified line, or append before closing ---
         if "last_modified:" in fm_block:
-            import re as _re
-            fm_block = _re.sub(r'(^|\n)last_modified:.*', f'\\1last_modified: {now_ts}', fm_block)
+            fm_block = re.sub(
+                r'(^|\n)(\s*)last_modified:.*',
+                rf'\1\2last_modified: {now_ts}',
+                fm_block,
+            )
         else:
             fm_block += f"\nlast_modified: {now_ts}"
         content = f"---\n{fm_block}\n---{body}"
     else:
-        # Bare content without frontmatter — wrap it
         content = f"---\nlast_modified: {now_ts}\n---\n{content}"
 
+    content, _moved, clash = nf.normalize_text(content)
+    if clash:
+        return f"!!! ERROR !!! frontmatter conflict in {filename}: {clash}"
     path.write_text(content)
-    if index_line:
-        _patch_memory_index(filename, index_line)
     return f"{'Updated' if existed else 'Created'}: {path}"
 
 
@@ -427,10 +372,11 @@ def delete_memory(filename: str) -> str:
 
 @mcp.tool()
 def archive_memory(filename: str, note: str = "") -> str:
-    """Move a memory file to past_projects/, adding an archived timestamp to its frontmatter.
+    """Move a memory file to past_projects/ with the canonical archived stamp.
 
-    Use during defrag to archive completed work in one call instead of read + write + delete.
-    Optionally attach a note explaining why it was archived.
+    Sets `status: archived` (plus `archived` date and optional `archive_note`)
+    nested under `metadata:` — the same shape memory_cli.py archive writes —
+    then moves the file. MEMORY.md is not touched; run regen_index.py after.
     """
     path, err = _resolve_memory_path(filename)
     if not path:
@@ -440,25 +386,30 @@ def archive_memory(filename: str, note: str = "") -> str:
             f"!!! ERROR !!! {filename} not found. "
             f"Recover: call list_memories() to see available files."
         )
+    if path.parent.name == "past_projects":
+        return f"!!! ERROR !!! {filename} is already archived"
 
-    content = path.read_text()
-    from datetime import date
-    stamp = f"archived: {date.today().isoformat()}"
+    text = path.read_text()
+    m = ml.FM_RE.match(text)
+    if not m:
+        return f"!!! ERROR !!! {filename} has no frontmatter to stamp"
+    top, nested, top_clerk, _ = nf._classify(m.group(1))
+    stamped = [ln for ln in nested
+               if not ln.strip().startswith(("status:", "archived:", "archive_note:"))]
+    stamped.append("  status: archived")
+    stamped.append(f"  archived: {time.strftime('%Y-%m-%d')}")
     if note:
-        stamp += f"\narchive_note: {note}"
+        stamped.append(f"  archive_note: {note}")
+    new_text = text[: m.start(1)] + nf._rebuild(top, stamped, top_clerk) + text[m.end(1):]
 
-    # Insert archived fields into frontmatter, or wrap bare content
-    if content.startswith("---\n"):
-        end = content.index("\n---", 4)
-        content = content[: end] + f"\n{stamp}" + content[end:]
-    else:
-        content = f"---\n{stamp}\n---\n{content}"
-
-    dst = MEMORY_DIR / "past_projects" / filename
-    dst.parent.mkdir(parents=True, exist_ok=True)
-    dst.write_text(content)
-    path.unlink()
-    return f"Archived: {filename} → past_projects/{filename}"
+    dest_dir = MEMORY_DIR / "past_projects"
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    dest = dest_dir / path.name
+    if dest.exists():
+        return f"!!! ERROR !!! past_projects/{path.name} already exists"
+    path.write_text(new_text)
+    shutil.move(str(path), str(dest))
+    return f"Archived: {filename} → past_projects/{path.name}"
 
 
 @mcp.tool()
@@ -474,7 +425,7 @@ def list_archived(query: str = "") -> list[dict]:
     q = query.lower()
     results = []
     for f in sorted(archive_dir.glob("*.md")):
-        fm, _ = _parse_frontmatter(f.read_text())
+        fm = ml.parse_frontmatter(f.read_text())
         name = fm.get("name", f.stem)
         description = fm.get("description", "")
         if q and q not in name.lower() and q not in description.lower():
