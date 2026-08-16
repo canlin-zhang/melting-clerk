@@ -65,7 +65,9 @@ Point it at a store (defaults to `~/.claude/memory`):
 export CLERK_MEMORY_DIR=~/.claude/memory
 ```
 
-`DSH_MEMORY_DIR` and `CLAUDE_MEMORY_DIR` remain as fallbacks.
+`DSH_MEMORY_DIR` (DSH) and `CLAUDE_MEMORY_DIR` (Claude) remain as per-harness
+aliases of `CLERK_MEMORY_DIR`. Claude and DSH are sibling harnesses; when both
+aliases are set, `DSH_MEMORY_DIR` wins because only the DSH plugin sets it.
 
 If your host also has a native memory directory setting, point both at the same
 path. The clerk curates what is in the store; the host loads it.
