@@ -15,20 +15,20 @@ import memorylib as ml
 CADENCE = 50
 
 CLERK_INSTRUCTION = (
-    "Clerk pass (fires only every 50 human messages — rare, so do NOT skip it). You MUST review "
-    "the recent stretch and update memory NOW: (1) file every material decision, root cause, and "
-    "rule-worthy feedback into ~/.claude/memory/ with the Write/Edit tools (small targeted edits, "
-    "not slow full rewrites); name files `<type>_<slug>.md` and keep clerk fields under "
-    "`metadata:`; a NEW project memory is a pointer — issue number, one state line, and only what "
-    "`gh issue view` cannot tell you (worktree, branch, scratch paths, "
-    "decisions never written up); "
-    "file a todo as an issue, not as a memory; (2) flip `status:` on any memory this session "
-    "invalidated (PR merged -> status: "
-    "merged; superseded -> tombstone the body); (3) refresh the handoff at "
-    "~/.claude/memory/.handoff.md if project state changed; (4) if you changed memory files, run: "
-    "python3 ${CLAUDE_PLUGIN_ROOT}/regen_index.py. Filing nothing is acceptable ONLY if nothing "
-    "material changed since the last pass — and you must say so explicitly, never punt a real "
-    "update. Then finish your reply normally."
+    f"Clerk pass (fires only every 50 human messages — rare, so do NOT skip it). You MUST review "
+    f"the recent stretch and update memory NOW: (1) file every material decision, root cause, and "
+    f"rule-worthy feedback into {ml.MEMORY_DIR}/ with the Write/Edit tools (small targeted edits, "
+    f"not slow full rewrites); name files `<type>_<slug>.md` and keep clerk fields under "
+    f"`metadata:`; a NEW project memory is a pointer — issue number, one state line, and only what "
+    f"`gh issue view` cannot tell you (worktree, branch, scratch paths, "
+    f"decisions never written up); "
+    f"file a todo as an issue, not as a memory; (2) flip `status:` on any memory this session "
+    f"invalidated (PR merged -> status: "
+    f"merged; superseded -> tombstone the body); (3) refresh the handoff at "
+    f"{ml.MEMORY_DIR}/.handoff.md if project state changed; (4) if you changed memory files, run: "
+    f"python3 ${{CLAUDE_PLUGIN_ROOT}}/regen_index.py. Filing nothing is acceptable ONLY if nothing "
+    f"material changed since the last pass — and you must say so explicitly, never punt a real "
+    f"update. Then finish your reply normally."
 )
 
 

@@ -16,7 +16,7 @@ def run_hook(store: Path, file_path, tool="Write", via_response=False):
         payload["tool_input"] = {}
     else:
         payload["tool_input"] = {"file_path": str(file_path)}
-    env = dict(os.environ, CLAUDE_MEMORY_DIR=str(store),
+    env = dict(os.environ, CLERK_MEMORY_DIR=str(store),
                PYTHONPATH=str(Path(__file__).resolve().parent.parent))
     return subprocess.run(["python3", "normalize_memory_write.py"],
                           input=json.dumps(payload), capture_output=True, text=True,
@@ -105,7 +105,7 @@ class TestNormalizeMemoryWrite(unittest.TestCase):
         self.assertEqual(r.stdout.strip(), "")
 
     def test_malformed_payload_is_silent(self):
-        env = dict(os.environ, CLAUDE_MEMORY_DIR=str(self.store),
+        env = dict(os.environ, CLERK_MEMORY_DIR=str(self.store),
                    PYTHONPATH=str(Path(__file__).resolve().parent.parent))
         r = subprocess.run(["python3", "normalize_memory_write.py"], input="not json",
                            capture_output=True, text=True, env=env,

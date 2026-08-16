@@ -62,8 +62,10 @@ the entry points with `uv tool install .` (gives `regen-index` and `memory-cli`)
 Point it at a store (defaults to `~/.claude/memory`):
 
 ```bash
-export CLAUDE_MEMORY_DIR=~/.claude/memory
+export CLERK_MEMORY_DIR=~/.claude/memory
 ```
+
+`DSH_MEMORY_DIR` and `CLAUDE_MEMORY_DIR` remain as fallbacks.
 
 If your host also has a native memory directory setting, point both at the same
 path. The clerk curates what is in the store; the host loads it.
@@ -97,7 +99,7 @@ survive that. See `docs/adr/0004`.
 
 ## The handoff
 
-A handoff is not a memory — it is one file, `$CLAUDE_MEMORY_DIR/.handoff.md`, with
+A handoff is not a memory — it is one file, `$CLERK_MEMORY_DIR/.handoff.md`, with
 no frontmatter, holding where work left off. `session_start.py` reads it and
 injects it into the next session along with your active todos, the branch, and
 which working copy you are in.

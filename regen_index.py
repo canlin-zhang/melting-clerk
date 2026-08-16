@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sole writer of ~/.claude/memory/MEMORY.md and triggers.json.
+"""Sole writer of the store's MEMORY.md and triggers.json.
 
 MEMORY.md is a generated artifact: Tier-0 entries get one index line each,
 Tier-1 is a single summary line. Deterministic (sorted by type order, then
@@ -12,14 +12,14 @@ import memorylib as ml
 
 HEADER = """# Memory Index (GENERATED — do not hand-edit)
 
-> regen_index.py owns this file; hand edits are overwritten on every regen.
-> Store: ~/.claude/memory/ — Read to read, Write/Edit to write. A PostToolUse
+> regen-index owns this file; hand edits are overwritten on every regen.
+> Store: $CLERK_MEMORY_DIR/ — Read to read, Write/Edit to write. A PostToolUse
 > normalizer keeps clerk fields (type/status/tier/...) under `metadata:`; only
 > name and description belong at the top level. Name files `<type>_<slug>.md`.
-> Aggregate queries and the archive move: ${CLAUDE_PLUGIN_ROOT}/memory_cli.py
+> Aggregate queries and the archive move: memory-cli
 > (list | recent | stale | archived | hidden | health | archive).
 > Tier 1 (arch, reference, archived/merged/superseded) has NO lines here —
-> reach it with Grep over the store, or `memory_cli.py list --type <type>`.
+> reach it with Grep over the store, or `memory-cli list --type <type>`.
 > Lifecycle: status active|merged|superseded|archived in frontmatter; flip
 > status when reality changes (clerk pass), tombstone superseded bodies.
 """
@@ -56,7 +56,7 @@ def render(entries: list[dict]) -> str:
     summary = ", ".join(f"{n} {t}" for t, n in sorted(counts.items()))
     lines += ["", "## Tier 1 (on demand)", "",
               f"{len(t1)} files not indexed here ({summary}) — "
-              "Grep or memory_cli.py reaches them.", ""]
+              "Grep or memory-cli reaches them.", ""]
     return "\n".join(lines)
 
 

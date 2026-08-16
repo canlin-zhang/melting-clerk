@@ -9,7 +9,7 @@ metadata:
 
 # Clones
 
-Copy this to `$CLAUDE_MEMORY_DIR/clones.md` and set `expected_origin` above to the
+Copy this to `$CLERK_MEMORY_DIR/clones.md` and set `expected_origin` above to the
 `org/repo` your working copies share. The SessionStart hook resolves the current
 `git rev-parse --show-toplevel`, matches it against the Path column, and appends a
 row automatically when the origin matches `expected_origin` and the path is new.

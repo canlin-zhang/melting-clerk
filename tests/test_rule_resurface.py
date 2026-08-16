@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 def run_hook(cmd, root, state_dir, session="s1"):
-    env = dict(os.environ, CLAUDE_MEMORY_DIR=str(root), CLERK_STATE_DIR=str(state_dir))
+    env = dict(os.environ, CLERK_MEMORY_DIR=str(root), CLERK_STATE_DIR=str(state_dir))
     payload = {"session_id": session, "hook_event_name": "PreToolUse",
                "tool_name": "Bash", "tool_input": {"command": cmd}}
     r = subprocess.run(["python3", "rule_resurface.py"], input=json.dumps(payload),
