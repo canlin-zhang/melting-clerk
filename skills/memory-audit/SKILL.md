@@ -51,7 +51,7 @@ Scan file names and descriptions for overlapping topics (e.g. `feedback_build.md
 
 ### 4a - Extract project/todo files and their reference sets
 
-Collect the project and todo files (`${CLAUDE_PLUGIN_ROOT}/memory_cli.py list --type project --json`, then `--type todo`). For each file, read the content and extract:
+Collect the project and todo files (python3 ${CLAUDE_PLUGIN_ROOT}/memory_cli.py list --type project --json`, then `--type todo`). For each file, read the content and extract:
 
 - **Issue references:** `#\d{4,6}` (e.g. `#16329`, `#16568`)
 - **PR references:** same pattern, distinguished by context (e.g. "PR #16568", "merged #16568")
@@ -125,6 +125,6 @@ Ask user to respond with numbers to act on (e.g. "1 3"). Execute one action at a
 - merge -> read both files, Write the merged content, delete the old one
 - fix hidden file -> Edit its frontmatter to add `type`/`description`
 
-After any change to memory files, run `${CLAUDE_PLUGIN_ROOT}/regen_index.py` so the index matches. Writes go through the Write/Edit tools; the PostToolUse normalizer keeps frontmatter in the canonical shape, so don't hand-place clerk fields at the top level.
+After any change to memory files, run `python3 ${CLAUDE_PLUGIN_ROOT}/regen_index.py` so the index matches. Writes go through the Write/Edit tools; the PostToolUse normalizer keeps frontmatter in the canonical shape, so don't hand-place clerk fields at the top level.
 
 Never batch multiple destructive actions without per-item confirmation.

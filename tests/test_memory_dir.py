@@ -14,10 +14,12 @@ def resolve(overrides):
     for key in ENV_KEYS:
         env.pop(key, None)
     env.update(overrides)
-    return subprocess.run(
+    proc = subprocess.run(
         ["python3", "-c", "import memorylib; print(memorylib.MEMORY_DIR)"],
         capture_output=True, text=True, env=env, cwd=SCRIPTS, timeout=30,
-    ).stdout.strip()
+    )
+    assert proc.returncode == 0, f"resolver failed with exit {proc.returncode}: {proc.stderr}"
+    return proc.stdout.strip()
 
 
 class TestMemoryDirPrecedence(unittest.TestCase):
@@ -39,6 +41,9 @@ class TestMemoryDirPrecedence(unittest.TestCase):
 
     def test_claude_fallback(self):
         self.assertEqual(resolve({"CLAUDE_MEMORY_DIR": "/claude"}), "/claude")
+
+    def test_default_is_claude_home(self):
+        self.assertEqual(resolve({}), str(Path.home() / ".claude" / "memory"))
 
 
 if __name__ == "__main__":

@@ -20,7 +20,7 @@ User says "defrag your memory", "clean up memory", or similar.
 - Skip `past_projects/` subdirectory entries
 - Note total active file count
 
-Also run `${CLAUDE_PLUGIN_ROOT}/memory_cli.py hidden` — files with broken or missing `type` appear in no listing, so a defrag driven only by the listing will silently skip them.
+Also run `python3 ${CLAUDE_PLUGIN_ROOT}/memory_cli.py hidden` — files with broken or missing `type` appear in no listing, so a defrag driven only by the listing will silently skip them.
 
 ### 1.5. GitHub PR/Issue audit (project + todo files only)
 
@@ -70,7 +70,7 @@ Use the closure table from step 1.5 to inform classification. Files where all re
 | **DELETE** | Fully redundant with another file | `rm` the file |
 | **MERGE** | Two+ files covering the same topic with overlapping content | Write combined content to one file, delete originals |
 | **FOLD** | Small file whose content fits naturally into an existing larger file | Edit content into the larger file, delete the small one |
-| **ARCHIVE** | Completed project (all PRs merged, no remaining TODOs) | `${CLAUDE_PLUGIN_ROOT}/memory_cli.py archive <file> --note "<why>"` — moves to past_projects/ and stamps frontmatter in one call |
+| **ARCHIVE** | Completed project (all PRs merged, no remaining TODOs) | `python3 ${CLAUDE_PLUGIN_ROOT}/memory_cli.py archive <file> --note "<why>"` — moves to past_projects/ and stamps frontmatter in one call |
 | **KEEP** | Still relevant, no overlap, right level of detail | No changes |
 
 There is no TRIM action for project files. Existing active project files keep their full merged PR details.
@@ -92,7 +92,7 @@ Apply judgment — a 120-line file with 5 tight, distinct anti-patterns is fine.
 
 Show a summary table: `file -> action -> reason`. **Get user approval before making changes.**
 
-After approval, execute the approved changes with Write/Edit/`rm`, and ARCHIVE via `${CLAUDE_PLUGIN_ROOT}/memory_cli.py archive`. Then run `python3 ${CLAUDE_PLUGIN_ROOT}/regen_index.py` — it is the sole writer of `MEMORY.md`, which is derived from frontmatter; never write that file by hand, since the next regen discards hand edits.
+After approval, execute the approved changes with Write/Edit/`rm`, and ARCHIVE via `python3 ${CLAUDE_PLUGIN_ROOT}/memory_cli.py archive`. Then run `python3 ${CLAUDE_PLUGIN_ROOT}/regen_index.py` — it is the sole writer of `MEMORY.md`, which is derived from frontmatter; never write that file by hand, since the next regen discards hand edits.
 
 Don't hand-place clerk fields (`type`, `status`, `tier`, `last_modified`) at the top level of frontmatter. They belong under `metadata:`, and the PostToolUse normalizer moves them there anyway — which means a file you just wrote may differ from what you wrote, so re-read before a follow-up edit.
 
@@ -145,7 +145,7 @@ find ~/.claude/projects/ -mindepth 2 -maxdepth 2 -type d -mtime +10 \
 - **Feedback files**: merge duplicates, fold small ones, delete if fully redundant
 - **Project files**: archive to `past_projects/` if all work is done
 - **Reference files**: merge closely related references
-- **MEMORY.md**: regenerate with `${CLAUDE_PLUGIN_ROOT}/regen_index.py` (the sole writer — never hand-edit)
+- **MEMORY.md**: regenerate with `python3 ${CLAUDE_PLUGIN_ROOT}/regen_index.py` (the sole writer — never hand-edit)
 
 ### CANNOT modify
 

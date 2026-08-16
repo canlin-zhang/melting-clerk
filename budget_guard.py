@@ -25,10 +25,10 @@ def main() -> None:
               f"oldest Tier-0 entries: {', '.join(cands)}. "
               f"Do this as a clerk pass early in the session.")
     if payload.get("source") == "compact":
-        print("[clerk] Compaction just occurred. Run a clerk pass now: file decisions/root-causes "
-              "from the compacted span into ~/.claude/memory/ with Write/Edit; flip status on "
-              "memories the work invalidated; refresh ~/.claude/memory/.handoff.md if project "
-              "state changed; then run regen_index.py. Filing nothing is a valid outcome.")
+        print(f"[clerk] Compaction just occurred. Run a clerk pass now: file decisions/root-causes "
+              f"from the compacted span into {ml.MEMORY_DIR}/ with Write/Edit; flip status on "
+              f"memories the work invalidated; refresh {ml.MEMORY_DIR}/.handoff.md if project "
+              f"state changed; then run regen-index. Filing nothing is a valid outcome.")
 
 
 if __name__ == "__main__":
