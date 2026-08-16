@@ -41,7 +41,7 @@ def make_repo(path: Path, origin: str | None) -> Path:
 
 
 def run_hook(store: Path, cwd: Path):
-    env = dict(os.environ, CLAUDE_MEMORY_DIR=str(store))
+    env = dict(os.environ, CLERK_MEMORY_DIR=str(store))
     return subprocess.run(["python3", str(SCRIPTS / "session_start.py")], cwd=cwd,
                           capture_output=True, text=True, env=env, timeout=30)
 

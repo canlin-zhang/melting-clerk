@@ -91,7 +91,7 @@ class TestBudgetGuard(unittest.TestCase):
     def _run(self, stdin_obj, env_root):
         import os
         import subprocess
-        env = dict(os.environ, CLAUDE_MEMORY_DIR=str(env_root))
+        env = dict(os.environ, CLERK_MEMORY_DIR=str(env_root))
         r = subprocess.run(
             ["python3", "budget_guard.py"], input=json.dumps(stdin_obj),
             capture_output=True, text=True, env=env, timeout=30)

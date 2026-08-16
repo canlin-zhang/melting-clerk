@@ -23,7 +23,11 @@ def resolve(overrides):
 class TestMemoryDirPrecedence(unittest.TestCase):
     def test_clerk_beats_dsh_beats_claude(self):
         self.assertEqual(
-            resolve({"CLERK_MEMORY_DIR": "/clerk", "DSH_MEMORY_DIR": "/dsh", "CLAUDE_MEMORY_DIR": "/claude"}),
+            resolve({
+                "CLERK_MEMORY_DIR": "/clerk",
+                "DSH_MEMORY_DIR": "/dsh",
+                "CLAUDE_MEMORY_DIR": "/claude",
+            }),
             "/clerk",
         )
 

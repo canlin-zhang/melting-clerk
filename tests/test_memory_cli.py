@@ -21,7 +21,7 @@ def mem(root: Path, name: str, typ: str, extra: str = "", age_days: int = 0) -> 
 
 
 def run(root: Path, *args):
-    env = dict(os.environ, CLAUDE_MEMORY_DIR=str(root), PYTHONPATH=str(SCRIPTS))
+    env = dict(os.environ, CLERK_MEMORY_DIR=str(root), PYTHONPATH=str(SCRIPTS))
     return subprocess.run(["python3", "memory_cli.py", *args], capture_output=True,
                           text=True, env=env, cwd=str(SCRIPTS), timeout=30)
 
