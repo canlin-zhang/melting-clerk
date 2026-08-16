@@ -26,7 +26,7 @@ CLERK_INSTRUCTION = (
     f"invalidated (PR merged -> status: "
     f"merged; superseded -> tombstone the body); (3) refresh the handoff at "
     f"{ml.MEMORY_DIR}/.handoff.md if project state changed; (4) if you changed memory files, run: "
-    f"regen-index. Filing nothing is acceptable ONLY if nothing "
+    f"python3 ${{CLAUDE_PLUGIN_ROOT}}/regen_index.py. Filing nothing is acceptable ONLY if nothing "
     f"material changed since the last pass — and you must say so explicitly, never punt a real "
     f"update. Then finish your reply normally."
 )

@@ -63,9 +63,9 @@ Point it at a store (defaults to `~/.claude/memory`):
 
 ```bash
 export CLERK_MEMORY_DIR=~/.claude/memory
+```
 
 `DSH_MEMORY_DIR` and `CLAUDE_MEMORY_DIR` remain as fallbacks.
-```
 
 If your host also has a native memory directory setting, point both at the same
 path. The clerk curates what is in the store; the host loads it.

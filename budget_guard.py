@@ -28,7 +28,8 @@ def main() -> None:
         print(f"[clerk] Compaction just occurred. Run a clerk pass now: file decisions/root-causes "
               f"from the compacted span into {ml.MEMORY_DIR}/ with Write/Edit; flip status on "
               f"memories the work invalidated; refresh {ml.MEMORY_DIR}/.handoff.md if project "
-              f"state changed; then run regen-index. Filing nothing is a valid outcome.")
+              f"state changed; then run python3 ${{CLAUDE_PLUGIN_ROOT}}/regen_index.py. "
+              "Filing nothing is a valid outcome.")
 
 
 if __name__ == "__main__":

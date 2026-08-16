@@ -51,7 +51,7 @@ Scan file names and descriptions for overlapping topics (e.g. `feedback_build.md
 
 ### 4a - Extract project/todo files and their reference sets
 
-Collect the project and todo files (python3 ${CLAUDE_PLUGIN_ROOT}/memory_cli.py list --type project --json`, then `--type todo`). For each file, read the content and extract:
+Collect the project and todo files (`python3 ${CLAUDE_PLUGIN_ROOT}/memory_cli.py list --type project --json`, then `--type todo`). For each file, read the content and extract:
 
 - **Issue references:** `#\d{4,6}` (e.g. `#16329`, `#16568`)
 - **PR references:** same pattern, distinguished by context (e.g. "PR #16568", "merged #16568")
