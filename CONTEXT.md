@@ -6,7 +6,7 @@ into a host-agnostic core and per-host frontends.
 ## Language
 
 **Store**:
-The directory of memory files, `$CLAUDE_MEMORY_DIR` (default `~/.claude/memory`). Flat markdown, one fact per file, plus a `past_projects/` archive.
+The directory of memory files, `$CLERK_MEMORY_DIR` (default `~/.claude/memory`). Flat markdown, one fact per file, plus a `past_projects/` archive.
 _Avoid_: memory folder, database, the memory
 
 **Memory index**:

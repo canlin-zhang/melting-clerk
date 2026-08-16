@@ -10,7 +10,7 @@ description: End-of-session hygiene: write a handoff, prompt for memory saves, s
 Get branch: `git rev-parse --abbrev-ref HEAD`
 Get working tree: `git rev-parse --show-toplevel` — worth recording when you keep several clones or worktrees of the same repo, since the next session needs to know which one held the in-progress branch.
 
-Write `$CLAUDE_MEMORY_DIR/.handoff.md` (default `~/.claude/memory/.handoff.md`) with the Write tool, using this structure (see HANDOFF-TEMPLATE.md). It has no frontmatter and is not a memory file — nothing indexes it. `session_start.py` reads that path and injects it as the next session's opening context, so the `Tree:` line above comes from the same clone registry it reports.
+Write `$CLERK_MEMORY_DIR/.handoff.md` (default `~/.claude/memory/.handoff.md`) with the Write tool, using this structure (see HANDOFF-TEMPLATE.md). It has no frontmatter and is not a memory file — nothing indexes it. `session_start.py` reads that path and injects it as the next session's opening context, so the `Tree:` line above comes from the same clone registry it reports.
 
 ```
 Branch: <branch>
@@ -25,7 +25,7 @@ Decisions made: <any architectural or workflow choices worth preserving, or "non
 
 Ask once: "Did we make any decisions or learn anything this session worth saving to memory?"
 
-If yes: write the file with the Write tool into `~/.claude/memory/`, frontmatter as `name`, `description`, then a `metadata:` block holding `type` and anything else. Name it `<type>_<slug>.md` — the memory repo decides what is version controlled from that prefix, so a `feedback_`/`user_` file named otherwise lands on the wrong side of it. Then run `python3 ${CLAUDE_PLUGIN_ROOT}/regen_index.py`; it is the sole writer of `MEMORY.md`.
+If yes: write the file with the Write tool into `$CLERK_MEMORY_DIR/`, frontmatter as `name`, `description`, then a `metadata:` block holding `type` and anything else. Name it `<type>_<slug>.md` — the memory repo decides what is version controlled from that prefix, so a `feedback_`/`user_` file named otherwise lands on the wrong side of it. Then run `python3 ${CLAUDE_PLUGIN_ROOT}/regen_index.py`; it is the sole writer of `MEMORY.md`.
 
 If no: skip - do not ask again.
 
