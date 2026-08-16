@@ -56,7 +56,7 @@ def render(entries: list[dict]) -> str:
     summary = ", ".join(f"{n} {t}" for t, n in sorted(counts.items()))
     lines += ["", "## Tier 1 (on demand)", "",
               f"{len(t1)} files not indexed here ({summary}) — "
-              "Grep or memory_cli.py reaches them.", ""]
+              "Grep or memory-cli reaches them.", ""]
     return "\n".join(lines)
 
 
