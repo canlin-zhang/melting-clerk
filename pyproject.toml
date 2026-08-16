@@ -2,20 +2,37 @@
 # PEP-723 `# /// script` block at the top of memory_server.py, so it can be run
 # with `uv run memory_server.py` and nothing else installed; they are mirrored
 # here so the test suite resolves imports from the repo root.
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "melting-clerk"
 version = "0.1.0"
 description = "Tiered agent memory with a generated, budgeted index and a status/tier lifecycle."
 requires-python = ">=3.11"
 dependencies = [
-    "mcp[cli]",
+    "mcp[cli]>=2,<3",
 ]
+
+[project.scripts]
+regen-index = "regen_index:main"
+memory-cli = "memory_cli:main"
 
 [dependency-groups]
 dev = ["pytest"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
+
+[tool.setuptools]
+py-modules = [
+    "memorylib",
+    "nest_frontmatter",
+    "migrate_frontmatter",
+    "memory_cli",
+    "regen_index",
+]
 
 [tool.ruff]
 target-version = "py311"

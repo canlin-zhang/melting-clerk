@@ -6,12 +6,13 @@ which checkout it is. The clone registry is data-driven: `clones.md` declares it
 own `expected_origin`, so this tracks working copies of whatever repo you point
 it at - see docs/adr/0005 for why a registry rides along with the memory store.
 """
-import os
 import re
 import subprocess
 from pathlib import Path
 
-MEMORY_DIR = Path(os.environ.get("CLAUDE_MEMORY_DIR", str(Path.home() / ".claude" / "memory")))
+import memorylib as ml
+
+MEMORY_DIR = ml.MEMORY_DIR
 HANDOFF_FILE = MEMORY_DIR / ".handoff.md"
 _FM_RE = re.compile(r"^---\n(.*?)\n---\n?", re.DOTALL)
 

@@ -6,7 +6,6 @@ Tier-1 is a single summary line. Deterministic (sorted by type order, then
 relpath) and atomic, so concurrent SessionStart hooks can't corrupt it.
 """
 import json
-import sys
 from pathlib import Path
 
 import memorylib as ml
@@ -79,6 +78,7 @@ def build_triggers(entries: list[dict]) -> dict:
 
 def regen(root=None) -> list[dict]:
     root = Path(root or ml.MEMORY_DIR)
+    root.mkdir(parents=True, exist_ok=True)
     entries = ml.walk_memories(root)
     ml.write_atomic(root / "MEMORY.md", render(entries))
     ml.write_atomic(root / "triggers.json", json.dumps(build_triggers(entries), indent=1))
@@ -98,10 +98,13 @@ def budget_status(root=None):
     return over, size, nlines, [e["file"] for e in t0[:5]]
 
 
-if __name__ == "__main__":
+def main() -> None:
     n = regen()
     over, size, nlines, cands = budget_status()
-    print(f"regen: {len(n)} entries, MEMORY.md {size}B/{nlines}L"
-          + (f" OVER BUDGET — demote candidates: {', '.join(cands)}"
-             if over else " (within budget)"))
-    sys.exit(0)
+    suffix = (f" OVER BUDGET — demote candidates: {', '.join(cands)}"
+              if over else " (within budget)")
+    print(f"regen: {len(n)} entries, MEMORY.md {size}B/{nlines}L{suffix}")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,7 +1,7 @@
 """Tests for memory_server.py's store logic, with the `mcp` dependency stubbed.
 
 CI skips memory_server.py because it imports `mcp`; these tests inject a fake
-`mcp.server.fastmcp` before importing it, so the store logic (write/archive/
+`mcp.server.mcpserver` before importing it, so the store logic (write/archive/
 list/traversal) is exercised with no third-party package installed.
 """
 import sys
@@ -12,9 +12,9 @@ from pathlib import Path
 
 
 def _install_fake_mcp() -> None:
-    fastmcp = types.ModuleType("mcp.server.fastmcp")
+    mcpserver = types.ModuleType("mcp.server.mcpserver")
 
-    class FastMCP:
+    class MCPServer:
         def __init__(self, name=None):
             self.name = name
 
@@ -24,14 +24,14 @@ def _install_fake_mcp() -> None:
         def run(self, *args, **kwargs):
             pass
 
-    fastmcp.FastMCP = FastMCP
+    mcpserver.MCPServer = MCPServer
     server = types.ModuleType("mcp.server")
-    server.fastmcp = fastmcp
+    server.mcpserver = mcpserver
     mcp = types.ModuleType("mcp")
     mcp.server = server
     sys.modules["mcp"] = mcp
     sys.modules["mcp.server"] = server
-    sys.modules["mcp.server.fastmcp"] = fastmcp
+    sys.modules["mcp.server.mcpserver"] = mcpserver
 
 
 _install_fake_mcp()

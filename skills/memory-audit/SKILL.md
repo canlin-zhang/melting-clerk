@@ -8,11 +8,10 @@ description: Audit memory files for staleness, orphaned index entries, and near-
 ## Step 1 - Gather
 
 ```bash
-cd ~/.claude/scripts
-python3 memory_cli.py stale --days 90   # not touched in 90+ days
-python3 memory_cli.py list              # every file the clerk can see
-python3 memory_cli.py archived          # past_projects/ entries
-python3 memory_cli.py hidden            # on disk but invisible to the clerk
+python3 ${CLAUDE_PLUGIN_ROOT}/memory_cli.py stale --days 90   # not touched in 90+ days
+python3 ${CLAUDE_PLUGIN_ROOT}/memory_cli.py list              # every file the clerk can see
+python3 ${CLAUDE_PLUGIN_ROOT}/memory_cli.py archived          # past_projects/ entries
+python3 ${CLAUDE_PLUGIN_ROOT}/memory_cli.py hidden            # on disk but invisible to the clerk
 ```
 
 Add `--json` to any of these when you need to process the output rather than read it.

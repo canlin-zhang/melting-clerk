@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Stop hook: nudge user if handoff not updated this session."""
-import os
 import time
-from pathlib import Path
 
-MEMORY_DIR = Path(os.environ.get("CLAUDE_MEMORY_DIR", str(Path.home() / ".claude" / "memory")))
+import memorylib as ml
+
+MEMORY_DIR = ml.MEMORY_DIR
 HANDOFF_FILE = MEMORY_DIR / ".handoff.md"
 _THRESHOLD = 600  # 10 minutes
 

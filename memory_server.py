@@ -2,25 +2,24 @@
 # /// script
 # requires-python = ">=3.11"
 # dependencies = [
-#   "mcp[cli]",
+#   "mcp[cli]>=2,<3",
 # ]
 # ///
-import os
 import re
 import shutil
 import sys
 import time
 from pathlib import Path
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
 import memorylib as ml
 import nest_frontmatter as nf
 
-MEMORY_DIR = Path(os.environ.get("CLAUDE_MEMORY_DIR", str(Path.home() / ".claude" / "memory")))
+MEMORY_DIR = ml.MEMORY_DIR
 HANDOFF_FILE = MEMORY_DIR / ".handoff.md"
 
-mcp = FastMCP("memory")
+mcp = MCPServer("memory")
 
 
 def _startup_checks() -> None:

@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 .venv/
+*.egg-info/
 *.db
 
 # Never commit a real memory store, even if CLAUDE_MEMORY_DIR is pointed
