@@ -54,7 +54,7 @@ class TestClerkCadence(unittest.TestCase):
         # Assert the doctrine, not the prose: filing nothing must stay permissible,
         # and the pass must tell Claude to regenerate the index after edits.
         self.assertIn("Filing nothing", out["reason"])
-        self.assertIn("regen_index.py", out["reason"])
+        self.assertIn("regen-index", out["reason"])
         # same count again -> silent (state advanced)
         r2 = run_hook(self.transcript, self.state)
         self.assertEqual(r2.stdout.strip(), "")
