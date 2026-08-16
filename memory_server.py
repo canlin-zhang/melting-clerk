@@ -5,7 +5,6 @@
 #   "mcp[cli]>=2,<3",
 # ]
 # ///
-import os
 import re
 import shutil
 import sys
@@ -17,7 +16,7 @@ from mcp.server.mcpserver import MCPServer
 import memorylib as ml
 import nest_frontmatter as nf
 
-MEMORY_DIR = Path(os.environ.get("CLAUDE_MEMORY_DIR", str(Path.home() / ".claude" / "memory")))
+MEMORY_DIR = ml.MEMORY_DIR
 HANDOFF_FILE = MEMORY_DIR / ".handoff.md"
 
 mcp = MCPServer("memory")

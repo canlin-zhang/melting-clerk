@@ -10,7 +10,16 @@ import os
 import re
 from pathlib import Path
 
-MEMORY_DIR = Path(os.environ.get("CLAUDE_MEMORY_DIR", str(Path.home() / ".claude" / "memory")))
+
+def _resolve_memory_dir() -> Path:
+    value = (os.environ.get("CLERK_MEMORY_DIR")
+             or os.environ.get("DSH_MEMORY_DIR")
+             or os.environ.get("CLAUDE_MEMORY_DIR")
+             or str(Path.home() / ".claude" / "memory"))
+    return Path(value)
+
+
+MEMORY_DIR = _resolve_memory_dir()
 STATE_DIR = Path(os.environ.get("CLERK_STATE_DIR", str(Path.home() / ".claude" / "clerk-state")))
 FM_RE = re.compile(r"^---\n(.*?)\n---\n?", re.DOTALL)
 # Capture the whole paragraph, not the first line: these wrap, and a line-only
