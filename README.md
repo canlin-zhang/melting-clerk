@@ -54,8 +54,10 @@ store reachable from a harness that has no such feature.
 
 The plugin registers the hooks in `hooks/hooks.json` and the MCP server in
 `.claude-plugin/plugin.json`. The server runs via `uv run`, which reads its
-dependencies from the PEP-723 block in `memory_server.py` — nothing to install
-separately.
+dependencies from the PEP-723 block in `memory_server.py`.
+
+Prerequisites: Python 3.11+ and `uv` on PATH. For the standalone CLI, install
+the entry points with `uv tool install .` (gives `regen-index` and `memory-cli`).
 
 Point it at a store (defaults to `~/.claude/memory`):
 
@@ -124,14 +126,14 @@ cannot occupy guaranteed context.
 ## Commands
 
 ```bash
-python3 regen_index.py                      # regenerate MEMORY.md + triggers.json
-python3 memory_cli.py list [--type T]       # everything the clerk can see
-python3 memory_cli.py stale --days 90       # untouched for N days
-python3 memory_cli.py recent --days 7
-python3 memory_cli.py archived [--query Q]
-python3 memory_cli.py hidden                # on disk, invisible to the clerk
-python3 memory_cli.py health
-python3 memory_cli.py archive <file> --note "why"
+regen-index                                 # regenerate MEMORY.md + triggers.json
+memory-cli list [--type T]                  # everything the clerk can see
+memory-cli stale --days 90                  # untouched for N days
+memory-cli recent --days 7
+memory-cli archived [--query Q]
+memory-cli hidden                           # on disk, invisible to the clerk
+memory-cli health
+memory-cli archive <file> --note "why"
 ```
 
 `hidden` is worth knowing about. A file whose frontmatter is unparseable or has
@@ -156,7 +158,7 @@ a file into the archive with its stamps.
 python3 -m unittest discover -s tests -t .   # or: uv run pytest
 ```
 
-63 tests. The ones worth reading first are in `tests/test_nest_frontmatter.py`:
+87 tests. The ones worth reading first are in `tests/test_nest_frontmatter.py`:
 the property that matters is that the clerk parses identical values before and
 after a migration, and that file bodies come through byte-for-byte.
 

@@ -78,6 +78,7 @@ def build_triggers(entries: list[dict]) -> dict:
 
 def regen(root=None) -> list[dict]:
     root = Path(root or ml.MEMORY_DIR)
+    root.mkdir(parents=True, exist_ok=True)
     entries = ml.walk_memories(root)
     ml.write_atomic(root / "MEMORY.md", render(entries))
     ml.write_atomic(root / "triggers.json", json.dumps(build_triggers(entries), indent=1))

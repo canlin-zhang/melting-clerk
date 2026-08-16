@@ -129,7 +129,7 @@ find ~/.claude/projects/ -mindepth 2 -maxdepth 2 -type d -mtime +10 \
 
 **What is NEVER cleaned:**
 - `~/.claude/memory/` (canonical memory store)
-- `~/.claude/sessions/` (session metadata, needed by claude-reflect)
+- `~/.claude/sessions/` (session metadata)
 - `~/.claude/settings.json`, `.credentials.json`, `policy-limits.json` (config)
 - `~/.claude/skills/`, `~/.claude/plugins/` (user assets); spec PDFs live at `~/specs/` (outside `~/.claude/`)
 - `~/.claude/mcp/` (MCP servers, databases)
@@ -145,14 +145,12 @@ find ~/.claude/projects/ -mindepth 2 -maxdepth 2 -type d -mtime +10 \
 - **Feedback files**: merge duplicates, fold small ones, delete if fully redundant
 - **Project files**: archive to `past_projects/` if all work is done
 - **Reference files**: merge closely related references
-- **MEMORY.md**: rewrite index using Write tool to match current state
+- **MEMORY.md**: regenerate with `${CLAUDE_PLUGIN_ROOT}/regen_index.py` (the sole writer — never hand-edit)
 
 ### CANNOT modify
 
 - **`past_projects/` folder**: never touch, read, modify, or reorganize during defrag. Permanent archive.
 - **User files** (`user_*.md`): only add to, never remove content without asking
-- **Spec summaries** in MEMORY.md header: manually curated, keep as-is
-- **Inline reference sections** in MEMORY.md: keep as-is
 - **File content accuracy**: never rewrite a memory to say something different from what the user originally conveyed
 - **Merged PR details in active project files**: never trim; only move to `past_projects/` when archiving the entire file
 
