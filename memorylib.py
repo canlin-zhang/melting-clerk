@@ -10,13 +10,23 @@ import os
 import re
 from pathlib import Path
 
+# Per-harness aliases for the canonical CLERK_MEMORY_DIR. Claude and DSH are
+# sibling harnesses, so their variables are siblings, not a priority chain:
+# each addresses the same store from its own harness. When both are set, DSH
+# is read first because only the DSH plugin sets DSH_MEMORY_DIR, so its
+# presence identifies the current harness — its variable wins over a legacy
+# export leaked from a shell profile.
+HARNESS_ALIASES = ("DSH_MEMORY_DIR", "CLAUDE_MEMORY_DIR")
+
 
 def _resolve_memory_dir() -> Path:
-    value = (os.environ.get("CLERK_MEMORY_DIR")
-             or os.environ.get("DSH_MEMORY_DIR")
-             or os.environ.get("CLAUDE_MEMORY_DIR")
-             or str(Path.home() / ".claude" / "memory"))
-    return Path(value)
+    value = os.environ.get("CLERK_MEMORY_DIR")
+    if not value:
+        for key in HARNESS_ALIASES:
+            value = os.environ.get(key)
+            if value:
+                break
+    return Path(value or str(Path.home() / ".claude" / "memory"))
 
 
 MEMORY_DIR = _resolve_memory_dir()
